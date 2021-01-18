@@ -1,4 +1,4 @@
-# Warehouse-Data-Analysis
+# Warehouse-Data
 
 Exploring and visualising anonymised warehousing data.
 
