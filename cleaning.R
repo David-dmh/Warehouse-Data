@@ -1,5 +1,3 @@
-setwd("~/DATA SCIENCE FOLDER/PROJECT FOLDER/Ferec SC Project - Data Analysis/W_DATA")
-
 df_old <- read.csv("C:/Users/User/Documents/DATA SCIENCE FOLDER/PROJECT FOLDER/Ferec SC Project - Data Analysis/data/ValueAddedActivities.csv")
 head(df_old)
 colnames(df_old)
