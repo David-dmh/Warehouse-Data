@@ -1,4 +1,4 @@
-# Warehouse-Data
+# Warehouse-Data-Visualisation
 
 Exploring and visualising anonymised warehousing data using a Shiny web application.
 
