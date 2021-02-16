@@ -33,11 +33,11 @@ ui <- fluidPage(
         selectInput("group", "Additional Option:", choices=NULL),
         # SI #4
         selectInput("plot.type", "Type:",
-                    list(Scatter="Scatter",
-                         Boxplot="Boxplot",
+                    list(Boxplot="Boxplot",
                          Bar="Bar",
                          Histogram="Histogram", 
                          Density="Density",
+                         Scatter="Scatter",
                          Smooth="Smooth")
         ),
         checkboxInput("show.points", "Show points", T)
@@ -49,7 +49,7 @@ ui <- fluidPage(
     )
 )
 
-server<-function(input, output, session){
+server <- function(input, output, session){
     observe({
         if(!exists(input$my_data)){return()}
         var.opts <- colnames(get(input$my_data))
@@ -57,14 +57,14 @@ server<-function(input, output, session){
         updateSelectInput(session, "group", choices=var.opts)
     })
     # SHOWS PLOT TYPE AS A TITLE
-    output$caption<-renderText({
+    output$caption <- renderText({
         switch(input$plot.type,
-               "Scatter"="Scatter Plot",
                "Boxplot"="Boxplot",
                "Bar"="Bar Graph",
                "Histogram"="Histogram",
                "Density"="Density Plot",
-               "Smooth"="Scatter Plot")
+               "Scatter"="Scatter Plot",
+               "Smooth"="Scatter Plot (w/ Loess fit)")
     })
     output$plot <- renderUI({
         plotOutput("pl")
@@ -81,7 +81,6 @@ server<-function(input, output, session){
         )
         if(any(sapply(obj, check))){return()}
         
-        # update choice made to plot
         check <- function(obj){
             !all(c(obj$variable, obj$group) %in% colnames(obj$data))
         }
@@ -100,13 +99,11 @@ server<-function(input, output, session){
                           "Scatter"=geom_point(aes_string(x=plot.obj$group, 
                                                           y=plot.obj$variable)),
                           "Smooth"=list(geom_point(aes_string(x=plot.obj$group, 
-                                                          y=plot.obj$variable)),  geom_smooth()))
-        if(input$plot.type=="Smooth"){
-            
-            pl <- ggplot(plot.obj$data,
-                         aes_string(x=plot.obj$group,
-                                    y=plot.obj$variable)) + plot.type
-        }
+                                                          y=plot.obj$variable)),  
+                                        geom_smooth(formula=y~x, method="loess")))
+        # see https://www.statsdirect.com/help/nonparametric_methods/loess.htm 
+        # for more on LOESS Curve Fitting (I chose this as an alternative to a 
+        # a linear model fit)
         
         if(input$plot.type=="Boxplot"){
             pl <- ggplot(plot.obj$data,
@@ -118,12 +115,16 @@ server<-function(input, output, session){
             if(input$show.points==T){
                 pl <- pl + geom_point(color="black", alpha=0.5, position="jitter")
             }
-        if(input$plot.type=="Scatter"){
+        
+        } else if(input$plot.type=="Scatter"){
             pl <- ggplot(plot.obj$data,
-                        aes_string(x=plot.obj$group,
-                            y=plot.obj$variable)) + plot.type
-            }
-        } else{
+                         aes_string(x=plot.obj$group,
+                                    y=plot.obj$variable)) + plot.type
+        } else if(input$plot.type=="Smooth"){
+            pl <- ggplot(plot.obj$data,
+                         aes_string(x=plot.obj$group,
+                                    y=plot.obj$variable)) + plot.type
+        } else {
             pl <- ggplot(plot.obj$data,
                       aes_string(
                           x=plot.obj$variable,
@@ -131,6 +132,7 @@ server<-function(input, output, session){
                           group=plot.obj$group
                       )) + plot.type
             }
+        # add labels
         pl <- pl + labs(
             fill=input$group,
             x=input$group,
@@ -144,7 +146,7 @@ server<-function(input, output, session){
             
             read.csv(inFile$datapath, header=input$header)
         })
-        observeEvent(input$file1, {inFile<<-upload_data()})   
+        observeEvent(input$file1, {inFile <<- upload_data()})   
     }
 
 shinyApp(ui, server)
