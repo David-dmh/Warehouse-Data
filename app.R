@@ -103,7 +103,8 @@ server <- function(input, output, session){
                                         geom_smooth(formula=y~x, method="loess")))
         # see https://www.statsdirect.com/help/nonparametric_methods/loess.htm 
         # for more on LOESS Curve Fitting (I chose this as an alternative to a 
-        # a linear model fit)
+        # a linear model fit); I chose loess since it is known to perform better
+        # at the boundaries, this may confer an advantage for business forecasting
         
         if(input$plot.type=="Boxplot"){
             pl <- ggplot(plot.obj$data,
